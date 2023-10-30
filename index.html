@@ -81,6 +81,7 @@
 			// Import the functions you need from the SDKs you need
 			import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
 			import { getAnalytics, logEvent} from "https://www.gstatic.com/firebasejs/10.4.0/firebase-analytics.js";
+            import { getFirestore, collection } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
 			// TODO: Add SDKs for Firebase products that you want to use
 			// https://firebase.google.com/docs/web/setup#available-libraries
@@ -100,12 +101,9 @@
 			// Initialize Firebase
 			const app = initializeApp(firebaseConfig);
 			const analytics = getAnalytics(app);
+            const db = getFirestore(app);
 
-            logEvent(analytics, 'select_content', {
-                content_type: 'image',
-                content_id: 'P12453'
-            });
-
+            
             function isWebView() {
 				var userAgent = window.navigator.userAgent.toLowerCase();
 				var standalone = window.navigator.standalone;
@@ -118,38 +116,54 @@
 				document.querySelector(".title").innerHTML = "WebView";
 				document.body.style.background = "#ea0";
                 document.querySelector(".button-yes")
-                    .addEventListener("click", () => {
+                    .addEventListener("click", async () => {
                         logEvent(analytics, "poll_wv", {
                             detected: "webview",
                             userAgent: window.navigator.userAgent,
                             confirmed: true,
                         });
+                        const docRef = await addDoc(collection(db, "iswebviewpoll"), {
+                            poll_result: "webview_true",
+                            userAgent: window.navigator.userAgent,
+                        });
                     });
                 document.querySelector(".button-no")
-                    .addEventListener("click", () => {
+                    .addEventListener("click", async () => {
                         logEvent(analytics, "poll_wv", {
                             detected: "webview",
                             userAgent: window.navigator.userAgent,
                             confirmed: false,
+                        });
+                        const docRef = await addDoc(collection(db, "iswebviewpoll"), {
+                            poll_result: "webview_false",
+                            userAgent: window.navigator.userAgent,
                         });
                     });
 			} else {
 				document.querySelector(".title").innerHTML = "Browser";
 				document.body.style.background = "#0ae";
                 document.querySelector(".button-yes")
-                    .addEventListener("click", () => {
+                    .addEventListener("click", async () => {
                         logEvent(analytics, "poll_wv", {
                             detected: "browser",
                             userAgent: window.navigator.userAgent,
                             confirmed: true,
                         });
+                        const docRef = await addDoc(collection(db, "iswebviewpoll"), {
+                            poll_result: "browser_true",
+                            userAgent: window.navigator.userAgent,
+                        });
                     });
                 document.querySelector(".button-no")
-                    .addEventListener("click", () => {
+                    .addEventListener("click", async () => {
                         logEvent(analytics, "poll_wv", {
                             detected: "browser",
                             userAgent: window.navigator.userAgent,
                             confirmed: false,
+                        });
+                        const docRef = await addDoc(collection(db, "iswebviewpoll"), {
+                            poll_result: "browser_false",
+                            userAgent: window.navigator.userAgent,
                         });
                     });
 			}
